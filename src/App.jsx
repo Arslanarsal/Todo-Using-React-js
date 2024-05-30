@@ -6,6 +6,11 @@ import Navbar from "./Components/Navbar";
 function App() {
   let [todo, settodo] = useState("");
   let [todos, settodos] = useState([]);
+  let [showtodo, setshowtodo] = useState(true);
+
+  const togglefinshedtodo = () => {
+    setshowtodo(!showtodo);
+  }
 
   useEffect(() => {
     let stringtodo = localStorage.getItem("todos");
@@ -63,6 +68,7 @@ function App() {
         <div className="container my-5 p-5  bg-violet-100 ">
           {/* Input */}
           <div className="getInput ">
+
             <h2 className="text-lg font-bold">Add a Todo</h2>
             <input
               onChange={handleChange}
@@ -72,17 +78,19 @@ function App() {
             />
             <button
               onClick={handleAdd}
-              className="bg-violet-800 text-sm font-bold rounded-md text-white px-2 py-1 hover:bg-violet-950 mx-6 "
+              disabled={todo.length <= 3}
+              className="bg-violet-800 text-sm font-bold disabled:bg-violet-700 rounded-md text-white px-2 py-1 hover:bg-violet-950 mx-6 "
             >
               Add
             </button>
           </div>
-          <h2 className="font-bold text-lg mt-5 mb-2">Your Todos</h2>
+          <input className="mt-7" onChange={togglefinshedtodo} type="checkbox" checked={showtodo} name="" id="" /> Show Finished
+          <h2 className="font-bold text-lg mt-2 mb-2">Your Todos</h2>
           {/* Todo Data */}
           {todos.length === 0 && <div>No Todos to Display</div>}
           <div className="todos">
             {todos.map((item) => {
-              return (
+              return (showtodo || !item.isCompleted) && (
                 <div
                   key={item.id}
                   className="todo flex w-1/2 justify-between my-3"
@@ -90,14 +98,13 @@ function App() {
                   <div className="flex gap-5">
                     <input
                       onClick={handleCheckBox}
-                      value={item.isCompleted}
+                      checked={item.isCompleted}
                       type="checkbox"
                       name={item.id}
                     />
                     <div
-                      className={`w-full max-w-[20rem] break-words ${
-                        item.isCompleted ? "line-through" : ""
-                      }`}
+                      className={`w-full max-w-[20rem] break-words ${item.isCompleted ? "line-through" : ""
+                        }`}
                     >
                       {item.todo}
                     </div>
