@@ -1,7 +1,63 @@
-// import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { v4 as uuidv4 } from 'uuid';
+
 import Navbar from "./Components/Navbar";
 
 function App() {
+  let [todo, settodo] = useState("");
+  let [todos, settodos] = useState([]);
+
+  useEffect(() => {
+      let stringtodo = localStorage.getItem("todos");
+      if (stringtodo) {
+        let todo = JSON.parse(localStorage.getItem("todos"));
+        settodos(todo);
+      }
+    }, [])
+
+  const savetoLS = (pararms) => {
+    localStorage.setItem("todos", JSON.stringify(todos))
+  }
+
+
+  const handleAdd = () => {
+    settodos([...todos, { id: uuidv4(), todo, isCompleted: false }])
+    settodo("");
+    savetoLS();
+
+  }
+  const handleEdit = (e, id) => {
+    let todo = todos.filter(item => item.id === id)
+    settodo(todo[0].todo)
+
+    let newtodo = todos.filter(item => {
+      return item.id !== id;
+    })
+    settodos(newtodo)
+    savetoLS();
+  }
+  const handleDelete = (e, id) => {
+    let newtodo = todos.filter(item => {
+      return item.id !== id;
+    })
+    settodos(newtodo)
+    savetoLS();
+  }
+  const handleChange = (e) => {
+    settodo(e.target.value);
+  }
+  const handleCheckBox = (e) => {
+
+    let id = e.target.name;
+    let index = todos.findIndex(item => {
+      return item.id == id;
+    })
+
+    let newtodos = [...todos];
+    newtodos[index].isCompleted = !newtodos[index].isCompleted;
+    settodos(newtodos);
+  }
+
   return (
     <>
       <Navbar />
@@ -11,14 +67,31 @@ function App() {
           {/* Input */}
           <div className="getInput ">
             <h2 className="text-lg font-bold">Add a Todo</h2>
-            <input className="w-1/2" type="text" />
-            <button className="bg-violet-800 text-sm font-bold rounded-md text-white px-2 py-1 hover:bg-violet-950 mx-6 " >Add</button>
+            <input onChange={handleChange} value={todo} className="w-1/2" type="text" />
+            <button onClick={handleAdd} className="bg-violet-800 text-sm font-bold rounded-md text-white px-2 py-1 hover:bg-violet-950 mx-6 " >Add</button>
+          </div>
+          <h2 className="font-bold text-lg mt-5 mb-2">Your Todos</h2>
+          {/* Todo Data */}
+          {todos.length === 0 && <div>No Todos to Display</div>}
+          <div className="todos">
+            {todos.map(item => {
+              return (<div key={item.id} className="todo flex w-1/2 justify-between my-3">
+                <div className="flex gap-5" >
+                  <input onClick={handleCheckBox} value={item.isCompleted} type="checkbox" name={item.id} />
+                  <div className={item.isCompleted ? "line-through" : ""} >{item.todo}</div>
+                </div>
+                <div className="btn">
+                  <button onClick={(e) => { handleEdit(e, item.id) }} className="bg-violet-800 text-sm font-bold rounded-md text-white px-2 py-1 hover:bg-violet-950 mx-6 " >Edit</button>
+                  <button onClick={(e) => { handleDelete(e, item.id) }} className="bg-violet-800 text-sm font-bold rounded-md text-white px-2 py-1 hover:bg-violet-950" >Delete</button>
+                </div>
+              </div>)
+            })}
           </div>
 
 
 
         </div>
-      </div>
+      </div >
     </>
   );
 }
